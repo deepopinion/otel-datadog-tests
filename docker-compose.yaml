@@ -1,0 +1,51 @@
+services:
+  redis:
+    image: redis
+    hostname: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "redis", "service": "redis"}]'
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    hostname: datadog-agent
+    container_name: datadog-agent
+    env_file:
+      - ".env.base"
+      - ".env"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup:/host/sys/fs/cgroup:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+
+  worker:
+    build: .
+    env_file:
+      - ".env.base"
+      - ".env"
+    entrypoint:
+      - /app/start-worker.sh
+    volumes:
+      - "./src/:/app/src/"
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "app", "service": "worker"}]'
+
+  nagger:
+    build: .
+    env_file:
+      - ".env.base"
+      - ".env"
+    entrypoint:
+      - /app/start-nagger.sh
+    volumes:
+      - "./src/:/app/src/"
+    ports:
+      - "8000:8000"
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "app", "service": "nagger"}]'
