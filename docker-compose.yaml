@@ -33,6 +33,8 @@ services:
       - /app/start-worker.sh
     volumes:
       - "./src/:/app/src/"
+      - "./start-nagger.sh:/app/start-nagger.sh"
+      - "./start-worker.sh:/app/start-worker.sh"
     labels:
       com.datadoghq.ad.logs: '[{"source": "app", "service": "worker"}]'
 
@@ -45,6 +47,8 @@ services:
       - /app/start-nagger.sh
     volumes:
       - "./src/:/app/src/"
+      - "./start-nagger.sh:/app/start-nagger.sh"
+      - "./start-worker.sh:/app/start-worker.sh"
     ports:
       - "8000:8000"
     labels:

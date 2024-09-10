@@ -14,14 +14,14 @@ def _setup_opentelemetry():
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    from opentelemetry.instrumentation.celery import CeleryInstrumentor
-    from opentelemetry.instrumentation.requests import RequestsInstrumentor
-    from opentelemetry.instrumentation.logging import LoggingInstrumentor
-    from opentelemetry.instrumentation.threading import ThreadingInstrumentor
-    from opentelemetry.instrumentation.redis import RedisInstrumentor
-    from opentelemetry.instrumentation.flask import FlaskInstrumentor
-    from opentelemetry.instrumentation.urllib import URLLibInstrumentor
-    from opentelemetry.instrumentation.urllib3 import URLLib3Instrumentor
+    # from opentelemetry.instrumentation.celery import CeleryInstrumentor
+    # from opentelemetry.instrumentation.requests import RequestsInstrumentor
+    # from opentelemetry.instrumentation.logging import LoggingInstrumentor
+    # from opentelemetry.instrumentation.threading import ThreadingInstrumentor
+    # from opentelemetry.instrumentation.redis import RedisInstrumentor
+    # from opentelemetry.instrumentation.flask import FlaskInstrumentor
+    # from opentelemetry.instrumentation.urllib import URLLibInstrumentor
+    # from opentelemetry.instrumentation.urllib3 import URLLib3Instrumentor
 
     resource = Resource.create(attributes={
         "service.name": "api-service"
@@ -34,14 +34,14 @@ def _setup_opentelemetry():
     )
     trace.get_tracer_provider().add_span_processor(span_processor)
 
-    LoggingInstrumentor().instrument(set_logging_format=True)
-    ThreadingInstrumentor().instrument()
-    RequestsInstrumentor().instrument()
-    CeleryInstrumentor().instrument()
-    RedisInstrumentor().instrument()
-    FlaskInstrumentor().instrument()
-    URLLibInstrumentor().instrument()
-    URLLib3Instrumentor().instrument()
+    # LoggingInstrumentor().instrument(set_logging_format=True)
+    # ThreadingInstrumentor().instrument()
+    # RequestsInstrumentor().instrument()
+    # CeleryInstrumentor().instrument()
+    # RedisInstrumentor().instrument()
+    # FlaskInstrumentor().instrument()
+    # URLLibInstrumentor().instrument()
+    # URLLib3Instrumentor().instrument()
 
 
 worker_class = "gevent"
