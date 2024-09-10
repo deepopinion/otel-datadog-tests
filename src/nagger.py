@@ -1,5 +1,8 @@
-import time
+import patch
+import cProfile
 import logging
+from contextlib import contextmanager
+from os import makedirs
 
 from flask import Flask
 from opentelemetry import trace
@@ -11,19 +14,29 @@ app = Flask(__name__)
 app.wsgi_app = OpenTelemetryMiddleware(app.wsgi_app)
 
 
-SLEEP_TIME = 10
-
 logger = logging.getLogger("otel-datadog-tests.nagger")
 tracer = trace.get_tracer("otel-datadog-tests.nagger")
 
 
+@contextmanager
+def profiling():
+    profiler = cProfile.Profile()
+    profiler.enable()
+
+    yield
+
+    profiler.disable()
+    makedirs("profiling", exist_ok=True)
+    profiler.dump_stats("profiling/nag.data")
+
+
+
+# @profiling()
 def nag():
     logger.info("***** Starting new nag *****")
     with tracer.start_as_current_span("nagging") as span:
         context = span.get_span_context()
-        time.sleep(0.1)
         async_task = check.apply_async()
-        time.sleep(0.1)
         result = async_task.get()
         logger.info("Got result from worker: %s", result)
         logger.info(
@@ -39,7 +52,6 @@ def nag():
         else:
             logger.warning("Spans don't match... :-(")
     logger.info("***** Finished nag *****")
-    logging.getLogger().handlers[0].flush()
 
 
 @app.route("/")
