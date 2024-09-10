@@ -1,3 +1,5 @@
+from typing import NoReturn
+
 import patch
 
 import cProfile
@@ -87,3 +89,8 @@ def chat_route(query: ChatQuery) -> dict[str, str]:
     return {
         "answer": response,
     }
+
+
+@app.get("/crash", summary="Crash hard", tags=[tests_tag])
+def crash_route() -> NoReturn:
+    raise RuntimeError("Let's crash!")
