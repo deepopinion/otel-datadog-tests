@@ -1,5 +1,8 @@
+import asyncio
 import logging
 
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_openai import ChatOpenAI
 from opentelemetry import trace
 
 from base import app
@@ -23,3 +26,12 @@ def check(self):
             "worker_trace_id": context.trace_id,
             "worker_span_id": context.span_id,
         }
+
+
+@app.task
+def chat(question: str) -> str:
+    model = ChatOpenAI(model="gpt-4")
+    message = HumanMessage(content=question)
+    response: AIMessage = asyncio.run(model.ainvoke([message]))
+
+    return response.content

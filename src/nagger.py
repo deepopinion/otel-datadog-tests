@@ -1,21 +1,32 @@
+from pydantic import BaseModel
+
 import patch
 import cProfile
 import logging
 from contextlib import contextmanager
 from os import makedirs
 
-from flask import Flask
+from flask_openapi3 import Info, Tag
+from flask_openapi3 import OpenAPI
 from opentelemetry import trace
 from opentelemetry.instrumentation.wsgi import OpenTelemetryMiddleware
 
-from worker import check
+from worker import check, chat
 
-app = Flask(__name__)
+
+
+info = Info(title="OpenTelemetry Datadog tests", version="0.0.0")
+app = OpenAPI(__name__, info=info)
 app.wsgi_app = OpenTelemetryMiddleware(app.wsgi_app)
+tests_tag = Tag(name="tests", description="Some tests")
 
 
 logger = logging.getLogger("otel-datadog-tests.nagger")
 tracer = trace.get_tracer("otel-datadog-tests.nagger")
+
+
+class ChatQuery(BaseModel):
+    question: str
 
 
 @contextmanager
@@ -54,8 +65,20 @@ def nag():
     logger.info("***** Finished nag *****")
 
 
-@app.route("/")
-def home():
+@app.get("/nag", summary="Nag Celery", tags=[tests_tag])
+def nag_route() -> dict[str, bool]:
     nag()
 
-    return "Done!"
+    return {
+        "ok": True,
+    }
+
+
+@app.get("/chat", summary="Chat within Celery", tags=[tests_tag])
+def chat_route(query: ChatQuery) -> dict[str, str]:
+    async_task = chat.delay(query.question)
+    response = async_task.get()
+
+    return {
+        "answer": response,
+    }
