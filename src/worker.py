@@ -17,11 +17,6 @@ def check(self):
     logger.info("Bound headers: %s", self.request.headers)
     with tracer.start_as_current_span("checking") as span:
         context = span.get_span_context()
-        logger.info(
-            "Worker got trace ID %s, span ID %s",
-            context.trace_id, context.span_id
-        )
-        logging.getLogger().handlers[0].flush()
         return {
             "worker_trace_id": context.trace_id,
             "worker_span_id": context.span_id,

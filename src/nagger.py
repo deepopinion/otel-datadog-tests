@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-
 import patch
+
 import cProfile
 import logging
 from contextlib import contextmanager
@@ -10,6 +9,7 @@ from flask_openapi3 import Info, Tag
 from flask_openapi3 import OpenAPI
 from opentelemetry import trace
 from opentelemetry.instrumentation.wsgi import OpenTelemetryMiddleware
+from pydantic import BaseModel
 
 from worker import check, chat
 
@@ -50,24 +50,27 @@ def nag():
         async_task = check.apply_async()
         result = async_task.get()
         logger.info("Got result from worker: %s", result)
-        logger.info(
-            "Nagger got trace ID %s, span ID %s",
-            context.trace_id, context.span_id
-        )
         if context.trace_id == result["worker_trace_id"]:
             logger.info("Traces match! :-)")
         else:
             logger.warning("Traces don't match... :-(")
-        if context.span_id == result["worker_span_id"]:
-            logger.info("Spans match! :-)")
-        else:
-            logger.warning("Spans don't match... :-(")
     logger.info("***** Finished nag *****")
 
 
 @app.get("/nag", summary="Nag Celery", tags=[tests_tag])
 def nag_route() -> dict[str, bool]:
     nag()
+
+    return {
+        "ok": True,
+    }
+
+
+@app.get("/logs", summary="Check logs", tags=[tests_tag])
+def logs_route() -> dict[str, bool]:
+    logger.info("This is an info.")
+    logger.warning("This is a warning.")
+    logger.error("This is an error.")
 
     return {
         "ok": True,
