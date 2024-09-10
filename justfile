@@ -9,5 +9,8 @@ build:
 run:
   docker compose up
 
+destroy:
+  docker compose down
+
 print-otel-requirements:
   poetry run opentelemetry-bootstrap -a requirements
