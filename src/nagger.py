@@ -82,6 +82,8 @@ def chat_route(query: ChatQuery) -> dict[str, str]:
     async_task = chat.delay(query.question)
     response = async_task.get()
 
+    logger.info("Question: %s / Answer: %s", query.question, response)
+
     return {
         "answer": response,
     }
